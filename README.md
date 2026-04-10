@@ -1,16 +1,29 @@
-# SBTI 人格测试
+# SBTI 人格测试 · 二创增强版
 
-> MBTI已经过时，SBTI来了。
+> MBTI已经过时，SBTI来了。恋爱版 · 职场版 · 全新UI
 
-一个开源的娱乐性人格测试项目，基于 B站UP主 [@蛆肉儿串儿](https://space.bilibili.com/417038183) 的原创测试。
+## Fork 声明
+
+本项目 Fork 自 **[pingfanfan/SBTI](https://github.com/pingfanfan/SBTI)**（MIT License），原始测试由 B站UP主 **[@蛆肉儿串儿](https://space.bilibili.com/417038183)**（UID: 417038183）原创。
+
+在原版基础上新增：
+
+- 🌹 **恋爱SBTI** — 专测恋爱人格，15维爱情模型
+- 💼 **职场SBTI** — 专测职场人格，15维职场模型
+- 🎴 **一键生成分享图** — Canvas 生成朋友圈卡片
+- 📋 **历史记录** — 本地保存多次测试结果
+- 👫 **双人对比** — 两人各测，看人格匹配度
+- ✨ **全新UI** — 动效、动画、精品化视觉
 
 ## 在线体验
 
-👉 [点击开始测试](https://pingfanfan.github.io/SBTI/)
+- 原版测试：[pingfanfan.github.io/SBTI](https://pingfanfan.github.io/SBTI/)
 
 ## 特性
 
-- 🧠 **27种人格类型** — 25种标准类型 + 2种隐藏/兜底类型
+- 🧠 **27种人格类型** — 25种标准类型 + 2种隐藏/兜底类型（原版保留）
+- 🌹 **恋爱版独立题库** — 专为恋爱场景设计的15维度测评
+- 💼 **职场版独立题库** — 专为职场场景设计的15维度测评
 - 📊 **15个评估维度** — 自我、情感、态度、行动、社交五大模型
 - 🎯 **曼哈顿距离匹配** — 基于15维向量的科学匹配算法
 - 🍺 **隐藏彩蛋** — 酒鬼人格触发机制
@@ -20,19 +33,21 @@
 ## 项目结构
 
 ```
-├── data/                    # 测试数据（修改这里来定制）
-│   ├── questions.json       # 题目和选项
-│   ├── dimensions.json      # 15个维度定义
-│   ├── types.json           # 人格类型和匹配模式
-│   └── config.json          # 评分参数和显示配置
+├── themes/
+│   ├── original/            # 原版数据（完整保留）
+│   ├── love/                # 恋爱SBTI数据
+│   └── work/                # 职场SBTI数据
 ├── src/                     # 源代码
-│   ├── engine.js            # 评分算法（纯函数）
+│   ├── engine.js            # 评分算法（纯函数，不变）
 │   ├── quiz.js              # 答题流程控制
 │   ├── result.js            # 结果页渲染
+│   ├── share.js             # 分享图生成（新增）
+│   ├── history.js           # 历史记录（新增）
+│   ├── compare.js           # 双人对比（新增）
 │   ├── chart.js             # 雷达图（Canvas API）
 │   ├── utils.js             # 工具函数
 │   ├── main.js              # 入口
-│   └── style.css            # 样式（CSS变量主题化）
+│   └── style.css            # 样式（CSS变量多主题化）
 ├── docs/
 │   └── analysis.md          # 数据分析报告
 └── index.html
@@ -42,8 +57,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/pingfanfan/SBTI.git
-cd SBTI
+git clone https://github.com/acheng-byte/SBTI-1.git
+cd SBTI-1
 
 # 安装依赖
 npm install
@@ -158,13 +173,14 @@ npm run build
 
 ## 致谢
 
-- 原创测试：B站UP主 [@蛆肉儿串儿](https://space.bilibili.com/417038183)（UID: 417038183）
-- 原版地址：[B站SBTI测试页面](https://www.bilibili.com/blackboard/era/VxiCX2CRqcqzPK9F.html)
+- **原创测试**：B站UP主 [@蛆肉儿串儿](https://space.bilibili.com/417038183)（UID: 417038183）
+- **原版代码**：[pingfanfan/SBTI](https://github.com/pingfanfan/SBTI)（MIT License）
+- **原版体验**：[B站SBTI测试页面](https://www.bilibili.com/blackboard/era/VxiCX2CRqcqzPK9F.html)
 
 ## 声明
 
-本测试仅供娱乐，请勿用于任何严肃场景。本项目为开源二创，如有侵权请联系删除。
+本测试仅供娱乐，请勿用于任何严肃场景。本项目为开源二创，遵循原项目 MIT 协议，完整保留原作者版权声明。如有侵权请联系删除。
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) — 原版权归 [pingfanfan](https://github.com/pingfanfan)，二创新增部分版权归本项目。

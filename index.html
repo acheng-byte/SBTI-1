@@ -4,18 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SBTI 人格测试</title>
-  <meta name="description" content="MBTI已经过时，SBTI来了。一个开源的娱乐性人格测试。" />
+  <meta name="description" content="MBTI已经过时，SBTI来了。原版·恋爱版·职场版，三种测试任你选。" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <div id="app">
-    <!-- 首页 -->
-    <section id="page-intro" class="page active">
+
+    <!-- 主题选择首页 -->
+    <section id="page-home" class="page active">
+      <div class="home-card">
+        <div class="home-hero">
+          <h1 class="home-title">SBTI</h1>
+          <p class="home-sub">MBTI已经过时，SBTI来了。</p>
+        </div>
+        <div class="theme-grid">
+          <button class="theme-card theme-original" data-theme="original">
+            <span class="theme-icon">🧠</span>
+            <span class="theme-name">原版测试</span>
+            <span class="theme-desc">27种经典人格 · 31题</span>
+          </button>
+          <button class="theme-card theme-love" data-theme="love">
+            <span class="theme-icon">🌹</span>
+            <span class="theme-name">恋爱版</span>
+            <span class="theme-desc">你是什么样的恋爱人格</span>
+          </button>
+          <button class="theme-card theme-work" data-theme="work">
+            <span class="theme-icon">💼</span>
+            <span class="theme-name">职场版</span>
+            <span class="theme-desc">你在职场里是哪种人</span>
+          </button>
+        </div>
+        <button id="btn-history" class="btn btn-ghost history-entry">📋 查看历史记录</button>
+        <p class="home-credit">Fork 自 <a href="https://github.com/pingfanfan/SBTI" target="_blank">pingfanfan/SBTI</a> · 原创：B站@蛆肉儿串儿</p>
+      </div>
+    </section>
+
+    <!-- 历史记录页 -->
+    <section id="page-history" class="page">
+      <div class="card">
+        <div class="page-header">
+          <button id="btn-history-back" class="btn btn-ghost btn-icon">← 返回</button>
+          <h2 class="page-title">历史记录</h2>
+          <button id="btn-clear-history" class="btn btn-ghost btn-danger-text">清空</button>
+        </div>
+        <div id="history-list"></div>
+        <p id="history-empty" class="empty-tip" style="display:none">还没有测试记录，快去测试吧</p>
+      </div>
+    </section>
+
+    <!-- 答题介绍页 -->
+    <section id="page-intro" class="page">
       <div class="card intro-card">
-        <h1 class="intro-title">MBTI已经过时，<br/>SBTI来了。</h1>
+        <div id="intro-icon" class="intro-theme-icon"></div>
+        <h1 id="intro-title" class="intro-title"></h1>
+        <p id="intro-desc" class="intro-desc"></p>
         <button id="btn-start" class="btn btn-primary">开始测试</button>
-        <p class="intro-credit">开源项目 · 基于 B站UP主@蛆肉儿串儿 原创测试</p>
+        <button id="btn-intro-back" class="btn btn-ghost btn-sm">← 换个主题</button>
         <p class="intro-note">本测试仅供娱乐</p>
       </div>
     </section>
@@ -23,10 +68,13 @@
     <!-- 答题页 -->
     <section id="page-quiz" class="page">
       <div class="card quiz-card">
+        <div class="quiz-header">
+          <span id="quiz-theme-label" class="quiz-theme-tag"></span>
+          <span id="progress-text" class="progress-text">0 / 30</span>
+        </div>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
-        <div class="progress-text" id="progress-text">0 / 31</div>
         <div class="question-area">
           <p class="question-text" id="question-text"></p>
         </div>
@@ -37,46 +85,59 @@
     <!-- 结果页 -->
     <section id="page-result" class="page">
       <div class="card result-card" id="result-card">
+        <div id="result-theme-badge" class="result-theme-badge"></div>
         <div class="result-kicker" id="result-kicker">你的主类型</div>
         <div class="result-code" id="result-code"></div>
         <div class="result-name" id="result-name"></div>
         <div class="result-badge" id="result-badge"></div>
-        <div class="result-intro" id="result-intro"></div>
-        <div class="result-desc" id="result-desc"></div>
+        <p class="result-intro" id="result-intro"></p>
+        <p class="result-desc" id="result-desc"></p>
 
         <div class="result-secondary" id="result-secondary" style="display:none">
-          <div class="secondary-label">次要匹配</div>
+          <div class="secondary-label">同时匹配</div>
           <div class="secondary-info" id="secondary-info"></div>
         </div>
 
-        <h3 class="section-title">十五维度评分</h3>
-        <canvas id="radar-chart" width="320" height="320"></canvas>
+        <h3 class="section-title">十五维雷达图</h3>
+        <canvas id="radar-chart" width="300" height="300"></canvas>
+
+        <h3 class="section-title">维度详情</h3>
         <div class="dimensions-detail" id="dimensions-detail"></div>
 
-        <div class="result-top3">
-          <h3 class="section-title">最佳匹配 TOP 5</h3>
-          <div id="top-list"></div>
-        </div>
+        <h3 class="section-title">全人格相似度排行</h3>
+        <div id="top-list"></div>
 
-        <div class="disclaimer" id="disclaimer"></div>
-
+        <!-- 操作按钮 -->
         <div class="result-actions">
-          <button id="btn-download" class="btn btn-primary">保存分享图片</button>
-          <button id="btn-restart" class="btn btn-secondary">重新测试</button>
+          <button id="btn-share" class="btn btn-primary">生成分享图</button>
+          <button id="btn-compare" class="btn btn-secondary">双人对比</button>
+          <button id="btn-restart" class="btn btn-secondary">再测一次</button>
+          <button id="btn-home" class="btn btn-ghost">换主题</button>
         </div>
 
-        <div class="agent-section">
-          <p class="agent-title">想自己搭一个？</p>
-          <div class="agent-cmd">
-            <code>git clone https://github.com/pingfanfan/SBTI.git && cd SBTI && npm install && npm run dev</code>
-          </div>
-          <button id="btn-agent" class="btn btn-agent">复制一键部署命令</button>
-          <p class="agent-hint">粘贴到 Claude Code / OpenClaw 即可一键运行并自定义</p>
+        <!-- 分享图预览 -->
+        <div id="share-preview" style="display:none; margin-top:20px; text-align:center">
+          <canvas id="share-canvas"></canvas>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:8px">长按图片保存到相册</p>
+          <button id="btn-download" class="btn btn-secondary btn-sm" style="margin-top:8px">下载图片</button>
         </div>
+
+        <!-- 双人对比 -->
+        <div id="compare-section" style="display:none; margin-top:24px">
+          <h3 class="section-title">双人对比</h3>
+          <div id="compare-input-area">
+            <p class="compare-hint">输入对方的人格代码，进行匹配度分析</p>
+            <input id="compare-code-input" class="compare-input" type="text" placeholder="如：SAFE-R 或 RED-FLAG" maxlength="20" />
+            <button id="btn-compare-go" class="btn btn-primary btn-block" style="margin-top:10px">分析匹配度</button>
+          </div>
+          <div id="compare-result" style="display:none; margin-top:16px"></div>
+        </div>
+
+        <div class="disclaimer">本测试仅供娱乐，结果不具有任何科学或心理学效力。</div>
       </div>
     </section>
-  </div>
 
+  </div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

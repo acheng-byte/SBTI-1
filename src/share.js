@@ -1,14 +1,40 @@
 /**
  * 生成分享图片 — 纯 Canvas 绘制，无外部依赖
+ * 支持多主题配色
  */
 
 const LEVEL_NUM = { L: 1, M: 2, H: 3 }
 const LEVEL_LABEL = { L: '低', M: '中', H: '高' }
 
+const THEME_COLORS = {
+  original: { bg: '#f0f4f1', card: '#ffffff', accent: '#4c6752', accentLight: '#e8f0ea', text: '#2c3e2d', textSec: '#6b7b6e' },
+  love:     { bg: '#fff0f3', card: '#ffffff', accent: '#c0304a', accentLight: '#fde8ed', text: '#3d1a22', textSec: '#8a5060' },
+  work:     { bg: '#f0f4ff', card: '#ffffff', accent: '#2d5be3', accentLight: '#e8edff', text: '#1a2340', textSec: '#5060a0' },
+}
+
 /**
- * 生成分享卡片并下载
+ * 新接口：generateShareImage(canvas, lastResult)
+ * 旧接口兼容：generateShareImage(primary, userLevels, dimOrder, dimDefs, mode)
  */
-export async function generateShareImage(primary, userLevels, dimOrder, dimDefs, mode) {
+export async function generateShareImage(canvasOrPrimary, resultOrUserLevels, dimOrderOrUndef, dimDefsOrUndef, modeOrUndef) {
+  // 判断新旧接口
+  if (canvasOrPrimary && canvasOrPrimary.tagName === 'CANVAS') {
+    // 新接口
+    const canvas = canvasOrPrimary
+    const { result, levels: userLevels, themeKey } = resultOrUserLevels
+    const primary = result?.primary || {}
+    const mode = result?.mode || 'normal'
+    const themeIcon = resultOrUserLevels.themeIcon || ''
+    const themeName = resultOrUserLevels.themeName || 'SBTI'
+    _drawToCanvas(canvas, primary, userLevels, [], {}, mode, themeKey || 'original', themeName, themeIcon)
+    return
+  }
+  // 旧接口回退
+  const primary = canvasOrPrimary
+  const userLevels = resultOrUserLevels
+  const dimOrder = dimOrderOrUndef || []
+  const dimDefs = dimDefsOrUndef || {}
+  const mode = modeOrUndef || 'normal'
   const dpr = 2
   const W = 720
   const H = 1280
@@ -17,125 +43,107 @@ export async function generateShareImage(primary, userLevels, dimOrder, dimDefs,
   canvas.height = H * dpr
   const ctx = canvas.getContext('2d')
   ctx.scale(dpr, dpr)
+  _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, THEME_COLORS.original, '', 'SBTI')
+  const link = document.createElement('a')
+  link.download = `SBTI-${primary.code}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+  return
+}
+
+function _drawToCanvas(canvas, primary, userLevels, dimOrder, dimDefs, mode, themeKey, themeName, themeIcon) {
+  const dpr = 2
+  const W = 720
+  const H = 1100
+  canvas.width = W * dpr
+  canvas.height = H * dpr
+  canvas.style.width = Math.min(W, window.innerWidth - 40) + 'px'
+  canvas.style.height = 'auto'
+  const ctx = canvas.getContext('2d')
+  ctx.scale(dpr, dpr)
+  const colors = THEME_COLORS[themeKey] || THEME_COLORS.original
+  _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, colors, themeIcon, themeName)
+}
+
+function _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, colors, themeIcon, themeName) {
 
   // 背景
-  ctx.fillStyle = '#f0f4f1'
+  ctx.fillStyle = colors.bg
   ctx.fillRect(0, 0, W, H)
+
+  // 顶部色条
+  ctx.fillStyle = colors.accent
+  ctx.fillRect(0, 0, W, 8)
 
   // 卡片白底
   const cardX = 32, cardY = 32, cardW = W - 64, cardH = H - 64
   roundRect(ctx, cardX, cardY, cardW, cardH, 20)
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = colors.card
+  ctx.shadowColor = 'rgba(0,0,0,0.07)'
+  ctx.shadowBlur = 24
   ctx.fill()
-  ctx.shadowColor = 'transparent'
+  ctx.shadowBlur = 0
 
-  let y = cardY + 48
+  let y = cardY + 52
+
+  // 主题标签
+  ctx.textAlign = 'center'
+  ctx.font = '600 16px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.fillStyle = colors.accent + '99'
+  ctx.fillText(`${themeIcon} ${themeName}`, W / 2, y)
+  y += 36
 
   // Kicker
-  ctx.textAlign = 'center'
-  ctx.font = '400 22px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#6b7b6e'
+  ctx.font = '400 20px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.fillStyle = colors.textSec
   const kickerText = mode === 'drunk' ? '隐藏人格已激活' : mode === 'fallback' ? '系统强制兜底' : '你的主类型'
   ctx.fillText(kickerText, W / 2, y)
   y += 56
 
   // 类型代码
   ctx.font = '900 72px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#4c6752'
-  ctx.fillText(primary.code, W / 2, y)
-  y += 40
+  ctx.fillStyle = colors.accent
+  ctx.fillText(primary.code || '???', W / 2, y)
+  y += 44
 
   // 中文名
-  ctx.font = '600 32px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#2c3e2d'
-  ctx.fillText(primary.cn, W / 2, y)
+  ctx.font = '600 30px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.fillStyle = colors.text
+  ctx.fillText(primary.cn || '', W / 2, y)
   y += 36
 
   // 匹配度徽章
-  const badgeText = `匹配度 ${primary.similarity}%` + (primary.exact != null ? ` · 精准命中 ${primary.exact}/15 维` : '')
-  ctx.font = '500 20px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  const badgeText = `匹配度 ${primary.similarity || 0}%` + (primary.exact != null ? ` · 精准命中 ${primary.exact}/15 维` : '')
+  ctx.font = '500 18px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
   const badgeW = ctx.measureText(badgeText).width + 40
-  roundRect(ctx, (W - badgeW) / 2, y - 16, badgeW, 36, 18)
-  ctx.fillStyle = '#e8f0ea'
+  roundRect(ctx, (W - badgeW) / 2, y - 16, badgeW, 34, 17)
+  ctx.fillStyle = colors.accentLight
   ctx.fill()
-  ctx.fillStyle = '#4c6752'
-  ctx.fillText(badgeText, W / 2, y + 6)
+  ctx.fillStyle = colors.accent
+  ctx.fillText(badgeText, W / 2, y + 4)
   y += 44
 
+  // 分割线
+  ctx.strokeStyle = colors.accent + '20'
+  ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(cardX + 48, y); ctx.lineTo(cardX + cardW - 48, y); ctx.stroke()
+  y += 28
+
   // Intro
-  ctx.font = 'italic 600 22px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#2c3e2d'
-  const introLines = wrapText(ctx, primary.intro || '', cardW - 80)
+  ctx.font = 'italic 600 20px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.fillStyle = colors.text
+  const introLines = wrapText(ctx, `"${primary.intro || ''}"`, cardW - 80)
   for (const line of introLines) {
     ctx.fillText(line, W / 2, y)
-    y += 30
+    y += 28
   }
-  y += 16
-
-  // 雷达图
-  const radarCx = W / 2
-  const radarCy = y + 150
-  const radarR = 130
-  drawShareRadar(ctx, radarCx, radarCy, radarR, userLevels, dimOrder, dimDefs)
-  y = radarCy + radarR + 40
-
-  // 维度条形图
-  y += 10
-  ctx.textAlign = 'left'
-  const barX = cardX + 48
-  const barMaxW = cardW - 96
-  const dimNameW = 110
-
-  for (const dim of dimOrder) {
-    const level = userLevels[dim] || 'M'
-    const val = LEVEL_NUM[level]
-    const def = dimDefs[dim]
-    if (!def) continue
-
-    const name = def.name.replace(/^[A-Za-z0-9]+\s*/, '')
-
-    // 维度名
-    ctx.font = '600 16px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-    ctx.fillStyle = '#2c3e2d'
-    ctx.fillText(name, barX, y)
-
-    // 进度条背景
-    const progX = barX + dimNameW
-    const progW = barMaxW - dimNameW - 50
-    const progH = 12
-    roundRect(ctx, progX, y - 10, progW, progH, 6)
-    ctx.fillStyle = '#e8f0ea'
-    ctx.fill()
-
-    // 进度条填充
-    const fillW = (val / 3) * progW
-    roundRect(ctx, progX, y - 10, fillW, progH, 6)
-    ctx.fillStyle = val === 3 ? '#2d7a4a' : val === 2 ? '#4c6752' : '#b8860b'
-    ctx.fill()
-
-    // 等级标签
-    ctx.textAlign = 'right'
-    ctx.font = '600 14px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-    ctx.fillStyle = val === 3 ? '#2d7a4a' : val === 2 ? '#4c6752' : '#b8860b'
-    ctx.fillText(LEVEL_LABEL[level], barX + barMaxW, y)
-    ctx.textAlign = 'left'
-
-    y += 26
-  }
-
-  y += 16
+  y += 20
 
   // 底部水印
   ctx.textAlign = 'center'
-  ctx.font = '400 18px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillStyle = '#aab8ac'
-  ctx.fillText('SBTI 人格测试 · 仅供娱乐', W / 2, H - cardY - 24)
-
-  // 下载
-  const link = document.createElement('a')
-  link.download = `SBTI-${primary.code}.png`
-  link.href = canvas.toDataURL('image/png')
-  link.click()
+  ctx.font = '400 16px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+  ctx.fillStyle = colors.accent + '50'
+  ctx.fillText('SBTI 人格测试 · MBTI已经过时，SBTI来了 · 仅供娱乐', W / 2, H - cardY - 24)
 }
 
 /**

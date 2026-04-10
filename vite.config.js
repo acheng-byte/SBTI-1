@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/SBTI/',
+  base: '/SBTI-1/',
   build: {
     outDir: 'dist',
   },
+  publicDir: false,
+  assetsInclude: [],
 })

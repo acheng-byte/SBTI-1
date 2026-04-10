@@ -1,14 +1,26 @@
 import { drawRadar } from './chart.js'
-import { generateShareImage } from './share.js'
 
 const LEVEL_LABEL = { L: '低', M: '中', H: '高' }
 const LEVEL_CLASS = { L: 'level-low', M: 'level-mid', H: 'level-high' }
 
 /**
  * 渲染测试结果
+ * @param result - 计算结果
+ * @param userLevels - 用户各维度等级
+ * @param dimOrder - 维度顺序
+ * @param dimDefs - 维度定义
+ * @param config - 配置
+ * @param theme - 主题对象 { icon, name, color }（可选）
  */
-export function renderResult(result, userLevels, dimOrder, dimDefs, config) {
+export function renderResult(result, userLevels, dimOrder, dimDefs, config, theme) {
   const { primary, secondary, rankings, mode } = result
+
+  // 主题徽章
+  const themeBadgeEl = document.getElementById('result-theme-badge')
+  if (themeBadgeEl && theme) {
+    themeBadgeEl.textContent = `${theme.icon || ''} ${theme.name || ''}`
+    themeBadgeEl.style.display = 'inline-block'
+  }
 
   // Kicker
   const kicker = document.getElementById('result-kicker')
