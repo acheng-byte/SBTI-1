@@ -21,12 +21,12 @@ export async function generateShareImage(canvasOrPrimary, resultOrUserLevels, di
   if (canvasOrPrimary && canvasOrPrimary.tagName === 'CANVAS') {
     // 新接口
     const canvas = canvasOrPrimary
-    const { result, levels: userLevels, themeKey } = resultOrUserLevels
+    const { result, levels: userLevels, themeKey, certId } = resultOrUserLevels
     const primary = result?.primary || {}
     const mode = result?.mode || 'normal'
     const themeIcon = resultOrUserLevels.themeIcon || ''
     const themeName = resultOrUserLevels.themeName || 'SBTI'
-    _drawToCanvas(canvas, primary, userLevels, [], {}, mode, themeKey || 'original', themeName, themeIcon)
+    _drawToCanvas(canvas, primary, userLevels, [], {}, mode, themeKey || 'original', themeName, themeIcon, certId)
     return
   }
   // 旧接口回退
@@ -51,7 +51,7 @@ export async function generateShareImage(canvasOrPrimary, resultOrUserLevels, di
   return
 }
 
-function _drawToCanvas(canvas, primary, userLevels, dimOrder, dimDefs, mode, themeKey, themeName, themeIcon) {
+function _drawToCanvas(canvas, primary, userLevels, dimOrder, dimDefs, mode, themeKey, themeName, themeIcon, certId) {
   const dpr = 2
   const W = 720
   const H = 1100
@@ -62,10 +62,10 @@ function _drawToCanvas(canvas, primary, userLevels, dimOrder, dimDefs, mode, the
   const ctx = canvas.getContext('2d')
   ctx.scale(dpr, dpr)
   const colors = THEME_COLORS[themeKey] || THEME_COLORS.original
-  _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, colors, themeIcon, themeName)
+  _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, colors, themeIcon, themeName, certId)
 }
 
-function _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, colors, themeIcon, themeName) {
+function _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, colors, themeIcon, themeName, certId) {
 
   // 背景
   ctx.fillStyle = colors.bg
@@ -138,6 +138,21 @@ function _drawContent(ctx, W, H, primary, userLevels, dimOrder, dimDefs, mode, c
     y += 28
   }
   y += 20
+
+  // 证书编号
+  if (certId) {
+    y += 8
+    ctx.font = '600 14px system-ui, "PingFang SC", "Microsoft YaHei", sans-serif'
+    ctx.fillStyle = colors.textSec
+    ctx.fillText('证书编号', W / 2, y)
+    y += 22
+    ctx.font = '700 15px "SF Mono", "Fira Code", "Consolas", monospace'
+    ctx.fillStyle = colors.accent
+    ctx.letterSpacing = '0.08em'
+    ctx.fillText(certId, W / 2, y)
+    ctx.letterSpacing = '0'
+    y += 20
+  }
 
   // 底部水印
   ctx.textAlign = 'center'

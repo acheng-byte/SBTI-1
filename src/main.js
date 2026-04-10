@@ -2,6 +2,7 @@ import { calcDimensionScores, scoresToLevels, determineResult } from './engine.j
 import { createQuiz } from './quiz.js'
 import { renderResult } from './result.js'
 import { saveHistory, loadHistory, clearHistory } from './history.js'
+import { generateCertId } from './cert.js'
 import './style.css'
 
 const THEMES = {
@@ -85,9 +86,10 @@ async function startTheme(themeKey) {
       data.types.special || [],
       { isDrunk, specialTrigger }
     )
-    lastResult = { result, levels, themeKey, themeName: theme.name, themeIcon: theme.icon, timestamp: Date.now() }
+    const certId = generateCertId(themeKey)   // 唯一编号，生成即固定
+    lastResult = { result, levels, themeKey, themeName: theme.name, themeIcon: theme.icon, timestamp: Date.now(), certId }
     saveHistory(lastResult)
-    renderResult(result, levels, data.dimensions.order, data.dimensions.definitions, data.config, theme)
+    renderResult(result, levels, data.dimensions.order, data.dimensions.definitions, data.config, theme, certId)
     showPage('result')
   }
 
@@ -131,6 +133,7 @@ function renderHistoryPage() {
         <span class="history-name">${item.result?.primary?.cn || ''}</span>
         <span class="history-sim">${item.result?.primary?.similarity || 0}%</span>
       </div>
+      ${item.certId ? `<div class="history-cert">${item.certId}</div>` : ''}
     </div>
   `
     )

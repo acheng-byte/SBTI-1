@@ -12,7 +12,7 @@ const LEVEL_CLASS = { L: 'level-low', M: 'level-mid', H: 'level-high' }
  * @param config - 配置
  * @param theme - 主题对象 { icon, name, color }（可选）
  */
-export function renderResult(result, userLevels, dimOrder, dimDefs, config, theme) {
+export function renderResult(result, userLevels, dimOrder, dimDefs, config, theme, certId) {
   const { primary, secondary, rankings, mode } = result
 
   // 主题徽章
@@ -20,6 +20,13 @@ export function renderResult(result, userLevels, dimOrder, dimDefs, config, them
   if (themeBadgeEl && theme) {
     themeBadgeEl.textContent = `${theme.icon || ''} ${theme.name || ''}`
     themeBadgeEl.style.display = 'inline-block'
+  }
+
+  // 证书编号
+  const certEl = document.getElementById('result-cert-id')
+  if (certEl && certId) {
+    certEl.textContent = certId
+    certEl.closest('.result-cert-block')?.style.setProperty('display', 'flex')
   }
 
   // Kicker

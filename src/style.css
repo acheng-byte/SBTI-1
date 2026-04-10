@@ -403,6 +403,36 @@ body {
   color: var(--text-secondary);
 }
 
+/* ========== Certificate Block ========== */
+.result-cert-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin: 12px 0 20px;
+  padding: 8px 18px;
+  background: var(--accent-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.result-cert-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.result-cert-id {
+  font-size: 0.82rem;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  user-select: all;
+}
+
 /* ========== Disclaimer ========== */
 .disclaimer {
   margin-top: 24px;
@@ -650,6 +680,15 @@ body {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+.history-cert {
+  font-size: 0.72rem;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin-top: 4px;
+  user-select: all;
 }
 
 .empty-tip {
