@@ -682,6 +682,10 @@ body {
   color: var(--text-secondary);
 }
 
+.history-search-bar {
+  margin-bottom: 16px;
+}
+
 .history-cert {
   font-size: 0.72rem;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
@@ -689,6 +693,15 @@ body {
   opacity: 0.7;
   margin-top: 4px;
   user-select: all;
+}
+
+.history-cert-highlight {
+  opacity: 1;
+  color: var(--accent);
+  font-weight: 700;
+  background: var(--accent-light);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .empty-tip {

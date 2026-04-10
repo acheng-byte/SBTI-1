@@ -107,23 +107,40 @@ async function startTheme(themeKey) {
   }
 }
 
-function renderHistoryPage() {
+function renderHistoryPage(filter = '') {
   const list = loadHistory()
   const el = document.getElementById('history-list')
   const empty = document.getElementById('history-empty')
+  const noMatch = document.getElementById('history-no-match')
 
   if (!list.length) {
     el.innerHTML = ''
     empty.style.display = 'block'
+    noMatch.style.display = 'none'
     return
   }
   empty.style.display = 'none'
-  el.innerHTML = list
-    .slice()
-    .reverse()
-    .map(
-      (item, i) => `
-    <div class="history-item" data-index="${list.length - 1 - i}">
+
+  const keyword = filter.trim().toUpperCase()
+  const reversed = list.slice().reverse()
+  const filtered = keyword
+    ? reversed.filter((item) => (item.certId || '').toUpperCase().includes(keyword))
+    : reversed
+
+  if (!filtered.length) {
+    el.innerHTML = ''
+    noMatch.style.display = 'block'
+    return
+  }
+  noMatch.style.display = 'none'
+
+  el.innerHTML = filtered
+    .map((item, i) => {
+      const certHtml = item.certId
+        ? `<div class="history-cert${keyword && item.certId.toUpperCase().includes(keyword) ? ' history-cert-highlight' : ''}">${item.certId}</div>`
+        : ''
+      return `
+    <div class="history-item">
       <div class="history-meta">
         <span class="history-theme">${item.themeIcon || ''} ${item.themeName || '未知主题'}</span>
         <span class="history-time">${formatTime(item.timestamp)}</span>
@@ -133,10 +150,10 @@ function renderHistoryPage() {
         <span class="history-name">${item.result?.primary?.cn || ''}</span>
         <span class="history-sim">${item.result?.primary?.similarity || 0}%</span>
       </div>
-      ${item.certId ? `<div class="history-cert">${item.certId}</div>` : ''}
+      ${certHtml}
     </div>
   `
-    )
+    })
     .join('')
 }
 
@@ -157,8 +174,12 @@ function init() {
 
   // 历史记录
   document.getElementById('btn-history').addEventListener('click', () => {
+    document.getElementById('history-search').value = ''
     renderHistoryPage()
     showPage('history')
+  })
+  document.getElementById('history-search').addEventListener('input', (e) => {
+    renderHistoryPage(e.target.value)
   })
   document.getElementById('btn-history-back').addEventListener('click', () => showPage('home'))
   document.getElementById('btn-clear-history').addEventListener('click', () => {

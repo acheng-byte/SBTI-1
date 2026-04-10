@@ -48,8 +48,12 @@
           <h2 class="page-title">历史记录</h2>
           <button id="btn-clear-history" class="btn btn-ghost btn-danger-text">清空</button>
         </div>
+        <div class="history-search-bar">
+          <input id="history-search" class="compare-input" type="text" placeholder="输入证书编号搜索，如 L-20260410-A7F3K2" maxlength="30" />
+        </div>
         <div id="history-list"></div>
         <p id="history-empty" class="empty-tip" style="display:none">还没有测试记录，快去测试吧</p>
+        <p id="history-no-match" class="empty-tip" style="display:none">没有找到匹配的证书编号</p>
       </div>
     </section>
 
