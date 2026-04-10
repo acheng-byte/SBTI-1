@@ -25,6 +25,7 @@ export function renderResult(result, userLevels, dimOrder, dimDefs, config, them
   // Kicker
   const kicker = document.getElementById('result-kicker')
   if (mode === 'drunk') kicker.textContent = '隐藏人格已激活'
+  else if (mode === 'special') kicker.textContent = '彩蛋触发'
   else if (mode === 'fallback') kicker.textContent = '系统强制兜底'
   else kicker.textContent = '你的主类型'
 
@@ -42,7 +43,7 @@ export function renderResult(result, userLevels, dimOrder, dimDefs, config, them
 
   // 次要匹配
   const secEl = document.getElementById('result-secondary')
-  if (secondary && (mode === 'drunk' || mode === 'fallback')) {
+  if (secondary && (mode === 'drunk' || mode === 'fallback' || mode === 'special')) {
     secEl.style.display = ''
     document.getElementById('secondary-info').textContent =
       `${secondary.code}（${secondary.cn}）· 匹配度 ${secondary.similarity}%`
@@ -90,23 +91,4 @@ export function renderResult(result, userLevels, dimOrder, dimDefs, config, them
     topEl.appendChild(item)
   })
 
-  // 免责声明
-  document.getElementById('disclaimer').textContent =
-    mode === 'normal' ? config.display.funNote : config.display.funNoteSpecial
-
-  // 下载分享图
-  const btnDownload = document.getElementById('btn-download')
-  btnDownload.onclick = () => {
-    generateShareImage(primary, userLevels, dimOrder, dimDefs, mode)
-  }
-
-  // 复制 AI Agent 命令
-  const btnAgent = document.getElementById('btn-agent')
-  btnAgent.onclick = () => {
-    const cmd = `git clone https://github.com/pingfanfan/SBTI.git && cd SBTI && npm install && npm run dev`
-    navigator.clipboard.writeText(cmd).then(() => {
-      btnAgent.textContent = '已复制!'
-      setTimeout(() => { btnAgent.textContent = '复制一键部署命令' }, 2000)
-    })
-  }
 }

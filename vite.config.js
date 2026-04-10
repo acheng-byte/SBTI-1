@@ -5,6 +5,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
-  publicDir: false,
-  assetsInclude: [],
+  publicDir: 'public',
 })

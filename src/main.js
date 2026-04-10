@@ -75,7 +75,7 @@ async function startTheme(themeKey) {
 
   const data = await loadThemeData(themeKey)
 
-  function onQuizComplete(answers, isDrunk) {
+  function onQuizComplete(answers, isDrunk, specialTrigger) {
     const scores = calcDimensionScores(answers, data.questions.main)
     const levels = scoresToLevels(scores, data.config.scoring.levelThresholds)
     const result = determineResult(
@@ -83,7 +83,7 @@ async function startTheme(themeKey) {
       data.dimensions.order,
       data.types.standard,
       data.types.special || [],
-      { isDrunk }
+      { isDrunk, specialTrigger }
     )
     lastResult = { result, levels, themeKey, themeName: theme.name, themeIcon: theme.icon, timestamp: Date.now() }
     saveHistory(lastResult)

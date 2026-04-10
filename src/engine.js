@@ -76,7 +76,7 @@ export function matchType(userLevels, dimOrder, pattern) {
  * @param {Array}   dimOrder     维度顺序
  * @param {Array}   standardTypes 标准类型数组
  * @param {Array}   specialTypes  特殊类型数组
- * @param {Object}  options      { isDrunk: boolean }
+ * @param {Object}  options      { isDrunk: boolean, specialTrigger: string|null }
  * @returns {{ primary: Object, secondary: Object|null, rankings: Array, mode: string }}
  */
 export function determineResult(userLevels, dimOrder, standardTypes, specialTypes, options = {}) {
@@ -92,13 +92,26 @@ export function determineResult(userLevels, dimOrder, standardTypes, specialType
   const drunk = specialTypes.find((t) => t.code === 'DRUNK')
   const hhhh = specialTypes.find((t) => t.code === 'HHHH')
 
-  // 酒鬼覆盖
+  // 酒鬼覆盖（原版）
   if (options.isDrunk && drunk) {
     return {
       primary: { ...drunk, similarity: best.similarity, exact: best.exact },
       secondary: best,
       rankings,
       mode: 'drunk',
+    }
+  }
+
+  // 新版特殊触发（恋爱/职场彩蛋）
+  if (options.specialTrigger) {
+    const triggered = specialTypes.find((t) => t.code === options.specialTrigger)
+    if (triggered) {
+      return {
+        primary: { ...triggered, similarity: best.similarity, exact: best.exact },
+        secondary: best,
+        rankings,
+        mode: 'special',
+      }
     }
   }
 
